@@ -21,6 +21,33 @@ CITY="${CITY:-}"
 TIME="${1:-morning}"  # morning 或 evening
 
 # ===== 获取城市 Location ID =====
+# 常用城市 → 和风 location ID 映射
+CITY_MAP() {
+  case "$1" in
+    "北京") echo "101010100" ;;
+    "上海") echo "101020100" ;;
+    "广州") echo "101280101" ;;
+    "深圳") echo "101280601" ;;
+    "南京") echo "101190101" ;;
+    "杭州") echo "101210101" ;;
+    "成都") echo "101270101" ;;
+    "武汉") echo "101200101" ;;
+    "重庆") echo "101040100" ;;
+    "西安") echo "101110101" ;;
+    "苏州") echo "101190401" ;;
+    "天津") echo "101030100" ;;
+    "长沙") echo "101250101" ;;
+    "郑州") echo "101180101" ;;
+    "东莞") echo "101281601" ;;
+    "青岛") echo "101120201" ;;
+    "沈阳") echo "101070101" ;;
+    "宁波") echo "101210401" ;;
+    "昆明") echo "101290101" ;;
+    "大连") echo "101070201" ;;
+    *) echo "" ;;
+  esac
+}
+
 if [ -z "$CITY" ]; then
   # 没有配置城市 → IP 定位（适合本地 Mac 运行）
   echo "▶ 未配置城市，使用 IP 定位..."
@@ -32,23 +59,22 @@ else
   echo "▶ 使用配置城市: $CITY_NAME"
 fi
 
-echo "   ↳ 请求城市: $CITY_NAME"
-echo "   ↳ 测试 API 连通性..."
-curl -s -o /dev/null -w "   ↳ HTTP状态码: %{http_code}, 耗时: %{time_total}s\n" \
-  --connect-timeout 10 \
-  "https://geoapi.qweather.com/v2/city/lookup?location=%E5%8D%97%E4%BA%AC&key=$HEFENG_KEY" || echo "   ↳ ❌ 连接失败"
-LOCATION_RESP=$(curl -s --connect-timeout 10 \
-  "https://geoapi.qweather.com/v2/city/lookup?location=%E5%8D%97%E4%BA%AC&key=$HEFENG_KEY" 2>&1 || true)
-LOCATION_ID=$(echo "$LOCATION_RESP" | jq -r '.location[0].id // empty' 2>/dev/null || echo "")
+LOCATION_ID=$(CITY_MAP "$CITY_NAME")
 
 if [ -z "$LOCATION_ID" ]; then
-  echo "❌ 无法获取城市 ID，API 返回:"
-  echo "$LOCATION_RESP" | head -c 500
-  echo ""
-  echo "   💡 可能原因：和风天气 Key 未激活、免费订阅未生效、城市名不支持"
-  echo "   💡 可去 https://dev.qweather.com 检查你的订阅状态"
-  exit 1
+  echo "   ↳ 城市不在内置列表中，尝试 API 查询..."
+  LOCATION_RESP=$(curl -s --connect-timeout 10 \
+    "https://geoapi.qweather.com/v2/city/lookup?location=$(echo -n "$CITY_NAME" | jq -sRr @uri)&key=$HEFENG_KEY" 2>&1 || true)
+  LOCATION_ID=$(echo "$LOCATION_RESP" | jq -r '.location[0].id // empty' 2>/dev/null || echo "")
+  if [ -z "$LOCATION_ID" ]; then
+    echo "❌ 无法获取城市 ID，API 返回:"
+    echo "$LOCATION_RESP" | head -c 500
+    echo ""
+    echo "   💡 可去 https://dev.qweather.com 检查你的订阅状态"
+    exit 1
+  fi
 fi
+echo "   ️城市 ID: $LOCATION_ID"
 echo "   ️城市 ID: $LOCATION_ID"
 
 # ===== 获取天气预报 =====
