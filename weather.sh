@@ -33,7 +33,9 @@ else
 fi
 
 echo "   ↳ 请求城市: $CITY_NAME"
-LOCATION_RESP=$(curl -s --connect-timeout 10 "https://geoapi.qweather.com/v2/city/lookup?location=$CITY_NAME&key=$HEFENG_KEY" 2>&1 || true)
+LOCATION_RESP=$(curl -s --connect-timeout 10 -G "https://geoapi.qweather.com/v2/city/lookup" \
+  --data-urlencode "location=$CITY_NAME" \
+  --data-urlencode "key=$HEFENG_KEY" 2>&1 || true)
 LOCATION_ID=$(echo "$LOCATION_RESP" | jq -r '.location[0].id // empty' 2>/dev/null || echo "")
 
 if [ -z "$LOCATION_ID" ]; then

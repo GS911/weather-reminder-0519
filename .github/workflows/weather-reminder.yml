@@ -39,6 +39,6 @@ jobs:
         env:
           HEFENG_KEY: ${{ secrets.HEFENG_KEY }}
           SCT_KEY: ${{ secrets.SCT_KEY }}
-          CITY: ${{ secrets.CITY }}
+          CITY: ${{ vars.CITY }}
         run: |
           bash weather.sh ${{ steps.time.outputs.time }}
