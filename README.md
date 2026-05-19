@@ -7,7 +7,7 @@
 
 ## 你需要准备的
 
-1. **和风天气 API Key** — 免费注册 https://dev.qweather.com
+1. **OpenWeatherMap API Key** — 免费注册 https://home.openweathermap.org/api_keys
 2. **ServerChan SendKey** — 免费注册 https://sct.ftqq.com
 3. **GitHub 账号** — 用来托管代码和运行定时任务
 
@@ -36,9 +36,9 @@ GitHub 仓库 → Settings → Secrets and variables → Actions → New reposit
 
 | 名称 | 值 |
 |------|-----|
-| `HEFENG_KEY` | 你的和风天气 API Key |
+| `OWM_KEY` | 你的 OpenWeatherMap API Key |
 | `SCT_KEY` | 你的 ServerChan SendKey |
-| `CITY` | 城市名，如 `北京`（可选，不填则用 IP 定位） |
+| `CITY` | 城市名，如 `南京`（可选，不填则用 IP 定位） |
 
 ### 4. 启用 Actions
 

@@ -37,7 +37,7 @@ jobs:
 
       - name: 运行天气脚本
         env:
-          HEFENG_KEY: ${{ secrets.HEFENG_KEY }}
+          OWM_KEY: ${{ secrets.OWM_KEY }}
           SCT_KEY: ${{ secrets.SCT_KEY }}
           CITY: ${{ vars.CITY }}
         run: |
