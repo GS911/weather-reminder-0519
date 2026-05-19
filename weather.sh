@@ -3,7 +3,7 @@
 # 早晚天气预报推送脚本
 # 依赖：curl, jq
 
-set -euo pipefail
+set -uo pipefail
 
 # ===== 配置 =====
 # 从环境变量读取，或从 ../config.env 加载
@@ -32,12 +32,16 @@ else
   echo "▶ 使用配置城市: $CITY_NAME"
 fi
 
-LOCATION_RESP=$(curl -s "https://geoapi.qweather.com/v2/city/lookup?location=$CITY_NAME&key=$HEFENG_KEY")
-LOCATION_ID=$(echo "$LOCATION_RESP" | jq -r '.location[0].id // empty')
+echo "   ↳ 请求城市: $CITY_NAME"
+LOCATION_RESP=$(curl -s --connect-timeout 10 "https://geoapi.qweather.com/v2/city/lookup?location=$CITY_NAME&key=$HEFENG_KEY" 2>&1 || true)
+LOCATION_ID=$(echo "$LOCATION_RESP" | jq -r '.location[0].id // empty' 2>/dev/null || echo "")
 
 if [ -z "$LOCATION_ID" ]; then
-  echo "❌ 无法获取城市 ID"
-  echo "$LOCATION_RESP" | jq '.'
+  echo "❌ 无法获取城市 ID，API 返回:"
+  echo "$LOCATION_RESP" | head -c 500
+  echo ""
+  echo "   💡 可能原因：和风天气 Key 未激活、免费订阅未生效、城市名不支持"
+  echo "   💡 可去 https://dev.qweather.com 检查你的订阅状态"
   exit 1
 fi
 echo "   ️城市 ID: $LOCATION_ID"
