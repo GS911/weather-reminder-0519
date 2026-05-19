@@ -63,7 +63,7 @@ LOCATION_ID=$(CITY_MAP "$CITY_NAME")
 
 if [ -z "$LOCATION_ID" ]; then
   echo "   ↳ 城市不在内置列表中，尝试 API 查询..."
-  LOCATION_RESP=$(curl -s --connect-timeout 10 \
+  LOCATION_RESP=$(curl -s --compressed --connect-timeout 10 \
     "https://geoapi.qweather.com/v2/city/lookup?location=$(echo -n "$CITY_NAME" | jq -sRr @uri)&key=$HEFENG_KEY" 2>&1 || true)
   LOCATION_ID=$(echo "$LOCATION_RESP" | jq -r '.location[0].id // empty' 2>/dev/null || echo "")
   if [ -z "$LOCATION_ID" ]; then
@@ -79,7 +79,7 @@ echo "   ️城市 ID: $LOCATION_ID"
 
 # ===== 获取天气预报 =====
 echo "▶ 获取天气预报..."
-WEATHER_RESP=$(curl -s "https://devapi.qweather.com/v7/weather/3d?location=$LOCATION_ID&key=$HEFENG_KEY")
+WEATHER_RESP=$(curl -s --compressed "https://devapi.qweather.com/v7/weather/3d?location=$LOCATION_ID&key=$HEFENG_KEY")
 if [ "$(echo "$WEATHER_RESP" | jq -r '.code')" != "200" ]; then
   echo "❌ 天气 API 返回异常: $(echo "$WEATHER_RESP" | jq '.')"
   exit 1
