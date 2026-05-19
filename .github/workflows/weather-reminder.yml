@@ -1,0 +1,44 @@
+name: 天气预报推送
+
+on:
+  schedule:
+    # 每天早上 7:00 (北京时间 UTC+8 → UTC 23:00)
+    - cron: '0 23 * * *'
+    # 每天晚上 21:00 (北京时间 UTC+8 → UTC 13:00)
+    - cron: '0 13 * * *'
+  # 也支持手动触发（在 GitHub 仓库 Actions 页面点按钮）
+  workflow_dispatch:
+    inputs:
+      time:
+        description: '提醒时段 (morning/evening)'
+        required: true
+        default: 'morning'
+
+jobs:
+  remind:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v4
+
+      - name: 安装 jq
+        run: sudo apt-get update && sudo apt-get install -y jq
+
+      - name: 判断时段
+        id: time
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "time=${{ inputs.time }}" >> $GITHUB_OUTPUT
+          elif [ $((10#$(date -u +%H))) -eq 23 ]; then
+            echo "time=morning" >> $GITHUB_OUTPUT
+          else
+            echo "time=evening" >> $GITHUB_OUTPUT
+          fi
+
+      - name: 运行天气脚本
+        env:
+          HEFENG_KEY: ${{ secrets.HEFENG_KEY }}
+          SCT_KEY: ${{ secrets.SCT_KEY }}
+          CITY: ${{ secrets.CITY }}
+        run: |
+          bash weather.sh ${{ steps.time.outputs.time }}
