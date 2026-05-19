@@ -33,9 +33,12 @@ else
 fi
 
 echo "   ↳ 请求城市: $CITY_NAME"
-LOCATION_RESP=$(curl -s --connect-timeout 10 -G "https://geoapi.qweather.com/v2/city/lookup" \
-  --data-urlencode "location=$CITY_NAME" \
-  --data-urlencode "key=$HEFENG_KEY" 2>&1 || true)
+echo "   ↳ 测试 API 连通性..."
+curl -s -o /dev/null -w "   ↳ HTTP状态码: %{http_code}, 耗时: %{time_total}s\n" \
+  --connect-timeout 10 \
+  "https://geoapi.qweather.com/v2/city/lookup?location=%E5%8D%97%E4%BA%AC&key=$HEFENG_KEY" || echo "   ↳ ❌ 连接失败"
+LOCATION_RESP=$(curl -s --connect-timeout 10 \
+  "https://geoapi.qweather.com/v2/city/lookup?location=%E5%8D%97%E4%BA%AC&key=$HEFENG_KEY" 2>&1 || true)
 LOCATION_ID=$(echo "$LOCATION_RESP" | jq -r '.location[0].id // empty' 2>/dev/null || echo "")
 
 if [ -z "$LOCATION_ID" ]; then
